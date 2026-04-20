@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1F4D2B">
+<title>Forest Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Fraunces:ital,wght@0,500;0,700;0,900;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest: #1F4D2B;
+  --forest-dark: #143019;
+  --forest-light: #2A6B3B;
+  --warm: #C9872E;
+  --warm-light: #F4A64A;
+  --warm-dark: #9B6520;
+  --cream: #F5F0E6;
+  --paper: #FBF8F2;
+  --ink: #1A1614;
+  --ink-soft: #4A4A4A;
+  --rule: #D9D2C4;
+  --danger: #8B2E2E;
+  --success: #2F7D3C;
+  --shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.45;
+  overscroll-behavior-y: contain;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  min-height: 100vh;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(31,77,43,0.04) 27px, rgba(31,77,43,0.04) 28px);
+}
+
+.topbar {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 14px 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 2px solid var(--forest-dark);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+}
+.topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.brand {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+.brand small {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+  margin-top: 1px;
+  text-transform: uppercase;
+}
+.run-status {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  background: rgba(255,255,255,0.1);
+  padding: 6px 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(245,240,230,0.15);
+  text-align: right;
+  line-height: 1.3;
+  min-width: 0;
+  max-width: 58%;
+  overflow: hidden;
+  cursor: pointer;
+}
+.run-status.live {
+  background: var(--warm);
+  color: var(--ink);
+  border-color: var(--warm-dark);
+  animation: livePulse 2.5s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,135,46,0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(201,135,46,0); }
+}
+.run-status b { font-size: 13px; }
+.run-status .area-name {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabs {
+  display: flex;
+  background: var(--forest-dark);
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+.tab {
+  flex: 1;
+  padding: 11px 2px 10px;
+  text-align: center;
+  color: rgba(245,240,230,0.55);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  position: relative;
+}
+.tab.active {
+  color: var(--warm-light);
+  border-bottom-color: var(--warm);
+}
+.tab .badge {
+  display: inline-block;
+  background: var(--warm);
+  color: var(--forest-dark);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-left: 2px;
+  font-weight: 800;
+  vertical-align: middle;
+  min-width: 14px;
+  text-align: center;
+}
+
+main { padding: 14px 14px 100px; }
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 22px;
+  margin: 4px 0 2px;
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 16px;
+  margin: 18px 0 8px;
+}
+.subhead {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.action-btn {
+  display: block;
+  width: 100%;
+  background: var(--forest);
+  color: var(--cream);
+  padding: 18px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--forest-dark), var(--shadow);
+  margin-bottom: 12px;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.action-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--forest-dark); }
+.action-btn small {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+.action-btn.warm { background: var(--warm); color: var(--ink); box-shadow: 0 2px 0 var(--warm-dark), var(--shadow); }
+.action-btn.warm:active { box-shadow: 0 1px 0 var(--warm-dark); }
+.action-btn.ghost {
+  background: transparent; color: var(--forest);
+  border: 2px solid var(--forest); box-shadow: none;
+  font-size: 14px; padding: 12px;
+}
+.action-btn.danger-ghost {
+  background: transparent; color: var(--danger);
+  border: 2px solid var(--danger); box-shadow: none;
+  font-size: 14px; padding: 12px;
+}
+.action-btn.secondary {
+  background: white; color: var(--forest);
+  border: 1.5px solid var(--rule);
+  box-shadow: var(--shadow);
+  font-size: 14px; padding: 12px;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.card.warm-accent { border-left: 4px solid var(--warm); }
+.card.forest-accent { border-left: 4px solid var(--forest); }
+.card.visit-due { background: linear-gradient(to right, #FFF8EA, white 60%); border-left: 4px solid var(--warm); }
+.card.overdue { background: linear-gradient(to right, #FFEEEE, white 60%); border-left: 4px solid var(--danger); }
+.card.unassigned { border-left: 4px solid var(--ink-soft); background: #FAFAF7; }
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 10px;
+}
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+}
+.card-meta {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.card-body { font-size: 13px; line-height: 1.4; color: var(--ink); }
+.card-body b { color: var(--forest); }
+
+.track-tag {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.track-A { background: #E8F0EA; color: var(--forest); }
+.track-B { background: #FFF0DC; color: #8B5A1E; }
+
+.outcome-tag {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.o-S { background: var(--success); color: white; }
+.o-R { background: var(--warm); color: var(--forest-dark); }
+.o-CB { background: #3B6491; color: white; }
+.o-CT { background: #6B5B8E; color: white; }
+.o-X { background: #888; color: white; }
+.o-NT { background: #aaa; color: white; }
+
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
+
+.field { margin-bottom: 12px; }
+.field label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.field .hint {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+input[type="text"], input[type="date"], textarea, select {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1.5px solid var(--rule);
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  color: var(--ink);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgba(31,77,43,0.1);
+}
+textarea { resize: vertical; min-height: 70px; font-family: 'Fraunces', serif; font-size: 15px; line-height: 1.4; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip {
+  display: inline-block;
+  padding: 6px 10px;
+  background: white;
+  border: 1.5px solid var(--rule);
+  border-radius: 16px;
+  font-size: 11.5px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--forest);
+}
+.chip:active { background: var(--forest); color: var(--cream); }
+
+.toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.toggle-btn {
+  padding: 14px 8px;
+  background: white;
+  border: 1.5px solid var(--rule);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
+}
+.toggle-btn small {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+.toggle-btn.active[data-track="A"] {
+  background: var(--forest); color: var(--cream); border-color: var(--forest);
+}
+.toggle-btn.active[data-track="B"] {
+  background: var(--warm); color: var(--ink); border-color: var(--warm);
+}
+.outcome-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.outcome-grid .toggle-btn.active {
+  background: var(--forest); color: var(--cream); border-color: var(--forest);
+}
+
+.run-banner {
+  background: linear-gradient(135deg, var(--warm), var(--warm-light));
+  color: var(--ink);
+  padding: 14px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 0 var(--warm-dark);
+}
+.run-banner-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.run-banner-area {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.run-banner-time {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.run-banner-stats {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.run-banner-stats b {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  margin-right: 4px;
+}
+.run-banner-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.run-banner-actions button {
+  flex: 1;
+  padding: 10px;
+  background: rgba(20,48,25,0.15);
+  border: 1px solid rgba(20,48,25,0.3);
+  color: var(--forest-dark);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.run-banner-actions button:active {
+  background: rgba(20,48,25,0.3);
+}
+
+.quick-guide {
+  background: var(--forest-dark);
+  color: var(--cream);
+  padding: 12px 14px;
+  border-radius: 3px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  border-left: 4px solid var(--warm);
+}
+.quick-guide b { color: var(--warm-light); }
+.quick-guide .label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.pb-section {
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.pb-header {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 12px 14px;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.pb-header.warm { background: var(--warm); color: var(--ink); }
+.pb-header .chev { font-family: 'JetBrains Mono', monospace; font-size: 14px; transition: transform 0.2s; }
+.pb-section.open .chev { transform: rotate(90deg); }
+.pb-body {
+  padding: 0; max-height: 0; overflow: hidden;
+  transition: max-height 0.25s ease, padding 0.25s ease;
+}
+.pb-section.open .pb-body { padding: 14px; max-height: 2500px; }
+.pb-body p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+.pb-body p:last-child { margin-bottom: 0; }
+.pb-body strong { color: var(--forest); }
+.pb-body .script {
+  background: #FFF8EA;
+  border-left: 3px solid var(--warm);
+  padding: 10px 12px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 8px 0;
+  border-radius: 0 3px 3px 0;
+}
+.pb-body ul { padding-left: 18px; margin: 6px 0; }
+.pb-body li { margin-bottom: 4px; font-size: 13.5px; }
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+}
+.empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.3; }
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(20,48,25,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-backdrop.open { display: flex; animation: fadeIn 0.15s; }
+.modal {
+  background: var(--paper);
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px 12px 0 0;
+  padding: 20px 16px 30px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-title { font-family: 'Fraunces', serif; font-weight: 900; font-size: 20px; }
+.x-btn {
+  background: none; border: none;
+  font-size: 24px; cursor: pointer;
+  color: var(--ink-soft); padding: 0 4px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.stat-box {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 12px 6px;
+  border-radius: 3px;
+  text-align: center;
+}
+.stat-box .num {
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--warm-light);
+}
+.stat-box .lbl {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
+.divider { height: 1px; background: var(--rule); margin: 14px 0; }
+.muted { color: var(--ink-soft); font-size: 11px; }
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 6px 10px;
+  background: white;
+  border: 1.5px solid var(--rule);
+  border-radius: 14px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+.filter-chip.active {
+  background: var(--forest);
+  color: var(--cream);
+  border-color: var(--forest);
+}
+.area-group-header {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--forest);
+  margin: 14px 0 6px;
+  padding: 4px 8px;
+  background: var(--cream);
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.section-label {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 13px;
+  margin: 16px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.section-label.danger { color: var(--danger); }
+.section-label.warm { color: var(--warm-dark); }
+.section-label.forest { color: var(--forest); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      FOREST <span style="color:var(--warm-light);">●</span> FIELD
+      <small>payroc iso · milton ma</small>
+    </div>
+    <div class="run-status" id="run-status" onclick="goToRunTab()">
+      <span id="run-status-line">no active run</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-view="home">Run</button>
+  <button class="tab" data-view="log">+ Log</button>
+  <button class="tab" data-view="followups">Follow-up<span class="badge" id="tab-badge-followups" style="display:none;">0</span></button>
+  <button class="tab" data-view="history">History</button>
+  <button class="tab" data-view="playbook">Play</button>
+</div>
+
+<main>
+
+<div class="view active" id="view-home">
+  <div id="home-content"></div>
+</div>
+
+<div class="view" id="view-log">
+  <h2>Log a Door</h2>
+  <div class="subhead" id="log-subhead">quick tap · 15 seconds</div>
+  <div id="log-run-indicator"></div>
+
+  <div class="field">
+    <label>Business Name *</label>
+    <input type="text" id="f-biz" placeholder="e.g. Tony's Pizza" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>Track · pick one</label>
+    <div class="toggle-row">
+      <button class="toggle-btn" data-track="A" onclick="setTrack('A')">
+        TRACK A<small>direct · busy shop</small>
+      </button>
+      <button class="toggle-btn" data-track="B" onclick="setTrack('B')">
+        TRACK B<small>CPR · relationship</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Owner / Contact name</label>
+    <input type="text" id="f-contact" placeholder="e.g. Tony, manager" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>The ONE Thing <span style="color:var(--warm);">★</span></label>
+    <textarea id="f-onething" placeholder="Daughter at UMass. Sox fan. Been open since '87. Hates Square fees."></textarea>
+    <div class="hint">The detail you'll bring up on visit 2. Most important field.</div>
+  </div>
+
+  <div class="field">
+    <label>Outcome *</label>
+    <div class="outcome-grid">
+      <button class="toggle-btn" data-outcome="S" onclick="setOutcome('S')">S — Statement<small>got it · run CMA</small></button>
+      <button class="toggle-btn" data-outcome="R" onclick="setOutcome('R')">R — Relationship<small>visit 2 planned</small></button>
+      <button class="toggle-btn" data-outcome="CB" onclick="setOutcome('CB')">CB — Callback<small>scheduled call</small></button>
+      <button class="toggle-btn" data-outcome="CT" onclick="setOutcome('CT')">CT — Contract<small>note end date</small></button>
+      <button class="toggle-btn" data-outcome="X" onclick="setOutcome('X')">X — Not viable<small>skip · don't return</small></button>
+      <button class="toggle-btn" data-outcome="NT" onclick="setOutcome('NT')">NT — No one<small>try again</small></button>
+    </div>
+  </div>
+
+  <div class="field" id="followup-date-field" style="display:none;">
+    <label>Return on</label>
+    <input type="date" id="f-returnon">
+  </div>
+
+  <div class="field" id="contract-end-field" style="display:none;">
+    <label>Contract ends</label>
+    <input type="date" id="f-contractend">
+    <div class="hint">You'll get reminded 60 days before.</div>
+  </div>
+
+  <div class="field">
+    <label>Processor / notes (optional)</label>
+    <input type="text" id="f-processor" placeholder="Square, Clover, Heartland…" autocomplete="off">
+  </div>
+
+  <button class="action-btn" onclick="saveDoor()">SAVE DOOR</button>
+  <button class="action-btn ghost" onclick="switchView('home')">Cancel</button>
+</div>
+
+<div class="view" id="view-followups">
+  <h2>Follow-ups</h2>
+  <div class="subhead">Where the real closes live</div>
+  <div class="filter-bar" id="followups-filter"></div>
+  <div id="followups-list"></div>
+</div>
+
+<div class="view" id="view-history">
+  <h2>History</h2>
+  <div class="subhead" id="history-subhead">Past runs &amp; areas</div>
+
+  <div class="filter-bar" id="history-toggle">
+    <button class="filter-chip active" onclick="setHistoryMode('runs')">By Run</button>
+    <button class="filter-chip" onclick="setHistoryMode('areas')">By Area</button>
+    <button class="filter-chip" onclick="setHistoryMode('unassigned')" id="unassigned-chip">Unassigned</button>
+  </div>
+
+  <div id="history-content"></div>
+
+  <div class="divider"></div>
+  <button class="action-btn secondary" onclick="exportData()">Export all data (JSON)</button>
+  <button class="action-btn danger-ghost" onclick="clearData()">Clear all data</button>
+</div>
+
+<div class="view" id="view-playbook">
+  <h2>The Playbook</h2>
+  <div class="subhead">Open before you walk in</div>
+
+  <div class="pb-section open">
+    <div class="pb-header" onclick="togglePb(this)">CORE PRINCIPLE <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>You are not here to pitch. You are here to become a person they recognize.</strong></p>
+      <p>The sale comes later — sometimes today, sometimes visit three. Your goal is to leave the owner <em>slightly disappointed</em> the conversation ended, having learned <strong>one thing</strong> about them you can bring up next time.</p>
+      <p>Leave with a statement? Bonus. Leave with a name and a story? <strong>You won.</strong></p>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header" onclick="togglePb(this)">READ THE ROOM — 5 SECONDS <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>TRACK A (direct) — ~20% of doors:</strong></p>
+      <ul><li>Owner busy, clipped, efficient</li><li>Customers in line</li><li>Corporate/chain feel, sterile walls</li></ul>
+      <div class="script">"Hey — Devin, Forest Financial. I do free statement reviews for local spots. 10 min, no pitch. Want me to swing back when you're slower?"</div>
+      <p style="margin-top:14px;"><strong>TRACK B (CPR) — ~80% of doors:</strong></p>
+      <ul><li>Owner behind counter, not rushed</li><li>Family photos, kids' drawings, sports stuff on walls</li><li>Mom-and-pop, independent feel</li></ul>
+      <p style="margin-top:10px;"><strong>Do NOT pitch.</strong> See next section.</p>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header warm" onclick="togglePb(this)">TRACK B — THE DISARM <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>Find ONE human thing in the room. Comment on it. Ask a follow-up. Then another.</strong></p>
+      <p>You are genuinely curious. Not running a script.</p>
+      <p><strong>What to look for:</strong></p>
+      <ul><li>Family photos, kids' drawings</li><li>Sports gear (Sox, Pats, B's, C's)</li><li>Military / service memorabilia</li><li>Awards, clippings, "Est. 19XX"</li><li>The accent, name of the place, smell of the food</li></ul>
+      <div class="script">"Man, it smells incredible in here — how long have you guys been open?"</div>
+      <div class="script">"Okay I gotta ask — is that your dad in the photo? My grandfather had a place like this in Quincy."</div>
+      <div class="script">"Est. 1987? You've outlasted three recessions. That's wild."</div>
+      <div class="script">"Sox fan? Brutal offseason, right?"</div>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header warm" onclick="togglePb(this)">THE PIVOT — "OH YEAH, THAT'S RIGHT" <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p>You've been talking 2–4 min. Genuinely interested. They're talking more than you. <strong>Two outcomes — both wins.</strong></p>
+      <p style="margin-top:12px;"><strong>A. They ask "so what brings you in?"</strong></p>
+      <p>Half-laugh. Shake your head. Low-energy, casual:</p>
+      <div class="script">"Oh yeah, that's right. Honestly? I work with local spots on their credit card processing. I do these free 10-minute statement reviews — just tell folks where they're getting nickel-and-dimed. But hey — no pressure, I was kinda just passing through."</div>
+      <p><strong>7 out of 10 times they grab the statement.</strong></p>
+      <p style="margin-top:14px;"><strong>B. They don't ask. Convo winds down.</strong></p>
+      <div class="script">"Hey — I should let you get back to it. I'm Devin, by the way. I'm actually in the credit card processing world — work with a lot of local spots around here. I'll swing back through sometime. Take care."</div>
+      <p><strong>Leave. No card unless they ask.</strong> Log the name &amp; one thing. Come back in 2–3 weeks.</p>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header" onclick="togglePb(this)">THE 3-VISIT ARC <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>V1 — Day 0 · Be memorable.</strong> Disarm. Get them talking. Leave with 1 personal detail. Don't ask for the statement.</p>
+      <p><strong>V2 — ~2–3 weeks later · Prove you remembered.</strong> Use their name, reference the one thing. <em>"Hey Tony — how'd that thing with the health inspector end up?"</em> NOW mention the review, framed as a favor.</p>
+      <p><strong>V3 — ~4–6 weeks later · Close.</strong> Come back with the CMA done. <em>"Tony, I ran your numbers. You're paying $X/mo in junk fees. I can save you $Y."</em></p>
+      <p><strong>Close rate on V3: 40–60%.</strong> Most ISOs never make V2. That's your edge.</p>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header" onclick="togglePb(this)">OBJECTIONS <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>"Not interested"</strong> → "Totally fair. I'll swing back through sometime." Log. Return 60 days.</p>
+      <p><strong>"Happy with our processor"</strong> → "Most folks I help are. They just don't know what they're actually paying. Review takes 10 min."</p>
+      <p><strong>"We just switched / in a contract"</strong> <span style="color:var(--warm);">← GOLD</span> → "When's it up?" <strong>WRITE THE DATE.</strong> Follow up 60 days before.</p>
+      <p><strong>"What are your rates?"</strong> → "Depends on your volume and ticket size — that's why I do the review first. I won't quote a number I can't back up."</p>
+      <p><strong>"Send me info by email"</strong> → "Happy to. What I really need is 10 min with your statement. Can I swing back Thursday?"</p>
+    </div>
+  </div>
+
+  <div class="pb-section">
+    <div class="pb-header" onclick="togglePb(this)">⚠ MA COMPLIANCE <span class="chev">▸</span></div>
+    <div class="pb-body">
+      <p><strong>RewardPay Choice is NOT available in MA, CT, or ME.</strong></p>
+      <p>For cash discount / zero-fee / surcharging conversations use <strong>ConsumerChoice</strong> — the compliant Payroc program for your market.</p>
+      <p>Don't lead with rates. Lead with the review.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Title</div>
+      <button class="x-btn" onclick="closeModal()">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'forest_field_v2';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (!s.runs) s.runs = [];
+      if (!s.doors) s.doors = [];
+      if (!s.reviews) s.reviews = [];
+      return s;
+    }
+  } catch (e) {}
+  return { runs: [], doors: [], reviews: [], activeRunId: null };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+let formState = { track: null, outcome: null, editingId: null };
+let historyMode = 'runs';
+let followupAreaFilter = null;
+
+function getActiveRun() {
+  if (!state.activeRunId) return null;
+  return state.runs.find(r => r.id === state.activeRunId) || null;
+}
+
+function startRun(area) {
+  const run = {
+    id: 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    area: area.trim(),
+    startedAt: new Date().toISOString(),
+    endedAt: null,
+    review: null,
+  };
+  state.runs.unshift(run);
+  state.activeRunId = run.id;
+  saveState();
+  renderHome();
+  updateRunStatus();
+}
+
+function endRun(auto) {
+  const run = getActiveRun();
+  if (!run) return;
+  run.endedAt = new Date().toISOString();
+  if (auto) run.autoEnded = true;
+  const runDoors = state.doors.filter(d => d.runId === run.id);
+  state.activeRunId = null;
+  saveState();
+  if (!auto && runDoors.length > 0) {
+    promptEodReview(run);
+  } else {
+    renderHome();
+    updateRunStatus();
+  }
+}
+
+function autoEndAtMidnightIfNeeded() {
+  const run = getActiveRun();
+  if (!run) return;
+  const started = new Date(run.startedAt);
+  const now = new Date();
+  if (started.toDateString() !== now.toDateString()) {
+    const endOfDay = new Date(started);
+    endOfDay.setHours(23, 59, 59, 999);
+    run.endedAt = endOfDay.toISOString();
+    run.autoEnded = true;
+    state.activeRunId = null;
+    saveState();
+  }
+}
+
+function getAreas() {
+  const set = new Set();
+  state.runs.forEach(r => { if (r.area) set.add(r.area); });
+  return [...set];
+}
+
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelector(`.tab[data-view="${name}"]`).classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'home') renderHome();
+  if (name === 'followups') renderFollowups();
+  if (name === 'history') renderHistory();
+  if (name === 'log') renderLogHeader();
+}
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => switchView(t.dataset.view));
+});
+function goToRunTab() { switchView('home'); }
+
+function updateRunStatus() {
+  const el = document.getElementById('run-status');
+  const line = document.getElementById('run-status-line');
+  const run = getActiveRun();
+  if (run) {
+    const doorsInRun = state.doors.filter(d => d.runId === run.id).length;
+    el.classList.add('live');
+    line.innerHTML = `
+      <span class="area-name">● ${escapeHtml(run.area)}</span>
+      <b>${doorsInRun}</b> / 15 doors
+    `;
+  } else {
+    el.classList.remove('live');
+    line.textContent = 'no active run';
+  }
+  const dueCount = computeDue().length;
+  const badge = document.getElementById('tab-badge-followups');
+  if (dueCount > 0) {
+    badge.textContent = dueCount;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+  const unassigned = state.doors.filter(d => !d.runId);
+  const chip = document.getElementById('unassigned-chip');
+  if (unassigned.length > 0) {
+    chip.innerHTML = `Unassigned <span style="background:var(--warm);color:var(--forest-dark);padding:1px 5px;border-radius:8px;font-size:9px;font-weight:800;margin-left:2px;">${unassigned.length}</span>`;
+  } else {
+    chip.textContent = 'Unassigned';
+  }
+}
+
+function renderHome() {
+  autoEndAtMidnightIfNeeded();
+  const run = getActiveRun();
+  const content = document.getElementById('home-content');
+
+  if (!run) {
+    content.innerHTML = renderNoActiveRun();
+    updateRunStatus();
+    return;
+  }
+
+  const runDoors = state.doors.filter(d => d.runId === run.id)
+    .sort((a,b) => new Date(b.loggedAt) - new Date(a.loggedAt));
+  const trackA = runDoors.filter(d => d.track === 'A').length;
+  const trackB = runDoors.filter(d => d.track === 'B').length;
+  const statements = runDoors.filter(d => d.outcome === 'S').length;
+  const rels = runDoors.filter(d => d.outcome === 'R').length;
+  const startedStr = new Date(run.startedAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+
+  content.innerHTML = `
+    <div class="run-banner">
+      <div class="run-banner-head">
+        <div class="run-banner-area">${escapeHtml(run.area)}</div>
+        <div class="run-banner-time">● LIVE · started ${startedStr}</div>
+      </div>
+      <div class="run-banner-stats">
+        <div><b>${runDoors.length}</b>doors</div>
+        <div><b>${statements}</b>stmts</div>
+        <div><b>${rels}</b>rels</div>
+        <div style="font-size:10px;opacity:0.7;">${trackA}A · ${trackB}B</div>
+      </div>
+      <div class="run-banner-actions">
+        <button onclick="endRun(false)">End Run</button>
+        <button onclick="promptCancelRun()">Cancel Run</button>
+      </div>
+    </div>
+
+    <button class="action-btn" onclick="switchView('log')">
+      + Log a door
+      <small>in ${escapeHtml(run.area)}</small>
+    </button>
+
+    <div class="quick-guide">
+      <div class="label">Before you walk in — read the room</div>
+      <b>Slow &amp; personal?</b> Track B. Find one human thing, ask about it, let them talk.<br>
+      <b>Busy &amp; clipped?</b> Track A. Respect the time. Direct &amp; brief.<br><br>
+      <b>The sale =</b> leaving with a name, a story, a reason to come back.
+    </div>
+
+    <h3>Doors this run</h3>
+    <div id="run-door-list">
+      ${runDoors.length === 0
+        ? `<div class="empty"><div class="empty-icon">○</div>no doors logged yet<br><span style="font-size:11px;">tap + log a door when you walk out</span></div>`
+        : runDoors.map(doorCard).join('')}
+    </div>
+  `;
+  updateRunStatus();
+}
+
+function renderNoActiveRun() {
+  const areas = getAreas();
+  const unassigned = state.doors.filter(d => !d.runId).length;
+  const areaChips = areas.length > 0
+    ? `<div class="chip-row">${areas.map(a => `<button class="chip" onclick="startRunFromChip('${escapeAttr(a)}')">${escapeHtml(a)}</button>`).join('')}</div>`
+    : '';
+
+  const lastRuns = state.runs.filter(r => r.endedAt).slice(0, 3);
+  const unassignedBanner = unassigned > 0
+    ? `<div class="card unassigned" onclick="setHistoryMode('unassigned')">
+         <div class="card-head">
+           <div class="card-title">${unassigned} unassigned door${unassigned>1?'s':''}</div>
+           <div class="card-meta">tap →</div>
+         </div>
+         <div class="card-body muted">Assign to a run when ready.</div>
+       </div>`
+    : '';
+
+  return `
+    <h2>Start a Run</h2>
+    <div class="subhead">One area, one run. Park once, walk it.</div>
+
+    <div class="field">
+      <label>Area name</label>
+      <input type="text" id="new-run-area" placeholder="e.g. Quincy Center, Abington Rt 18" autocomplete="off">
+      ${areaChips ? `<div class="hint" style="margin-top:8px;">Recent areas — tap to reuse:</div>${areaChips}` : ''}
+    </div>
+
+    <button class="action-btn" onclick="startRunFromInput()">
+      START RUN
+      <small>all doors logged after this go here</small>
+    </button>
+
+    <button class="action-btn secondary" onclick="switchView('log')">
+      + Log a door without a run
+      <small>assign it later</small>
+    </button>
+
+    ${unassignedBanner}
+
+    ${lastRuns.length > 0 ? `
+      <h3>Recent runs</h3>
+      ${lastRuns.map(runCard).join('')}
+    ` : ''}
+  `;
+}
+
+function startRunFromInput() {
+  const val = document.getElementById('new-run-area').value.trim();
+  if (!val) { alert('Enter an area name'); return; }
+  startRun(val);
+}
+function startRunFromChip(area) { startRun(area); }
+function promptCancelRun() {
+  if (!confirm('Cancel this run? Doors stay logged but unassigned.')) return;
+  const run = getActiveRun();
+  if (!run) return;
+  state.doors.forEach(d => { if (d.runId === run.id) d.runId = null; });
+  state.runs = state.runs.filter(r => r.id !== run.id);
+  state.activeRunId = null;
+  saveState();
+  renderHome();
+}
+
+function doorCard(d) {
+  const outcomeLabel = {
+    S: 'got statement', R: 'relationship', CB: 'callback',
+    CT: 'contract', X: 'not viable', NT: 'no one there'
+  }[d.outcome] || d.outcome;
+  const timeStr = new Date(d.loggedAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  const accent = d.track === 'B' ? 'warm-accent' : d.track === 'A' ? 'forest-accent' : 'unassigned';
+  return `
+    <div class="card ${accent}" onclick="viewDoor('${d.id}')">
+      <div class="card-head">
+        <div class="card-title">${escapeHtml(d.business)}</div>
+        <div class="card-meta">${timeStr}</div>
+      </div>
+      <div class="card-body">
+        ${d.contact ? `<b>${escapeHtml(d.contact)}</b> · ` : ''}
+        ${d.oneThing ? escapeHtml(d.oneThing) : '<em style="color:var(--ink-soft);">no "one thing" logged</em>'}
+      </div>
+      <div class="tag-row">
+        ${d.track ? `<span class="track-tag track-${d.track}">Track ${d.track}</span>` : ''}
+        <span class="outcome-tag o-${d.outcome}">${d.outcome} · ${outcomeLabel}</span>
+      </div>
+    </div>`;
+}
+
+function runCard(r) {
+  const doors = state.doors.filter(d => d.runId === r.id);
+  const stmts = doors.filter(d => d.outcome === 'S').length;
+  const rels = doors.filter(d => d.outcome === 'R').length;
+  const date = new Date(r.startedAt).toLocaleDateString([], {month:'short', day:'numeric'});
+  return `
+    <div class="card forest-accent" onclick="viewRun('${r.id}')">
+      <div class="card-head">
+        <div class="card-title">${escapeHtml(r.area)}</div>
+        <div class="card-meta">${date}</div>
+      </div>
+      <div class="card-body">
+        <b>${doors.length}</b> doors · <b>${stmts}</b> stmts · <b>${rels}</b> rels
+        ${r.autoEnded ? ' · <em style="color:var(--ink-soft);">auto-ended</em>' : ''}
+      </div>
+    </div>`;
+}
+
+function renderLogHeader() {
+  const run = getActiveRun();
+  const ind = document.getElementById('log-run-indicator');
+  if (run) {
+    ind.innerHTML = `<div style="padding:8px 12px;background:var(--cream);border-left:3px solid var(--warm);border-radius:2px;margin-bottom:14px;font-size:12px;">
+      Logging into: <b>${escapeHtml(run.area)}</b>
+    </div>`;
+  } else {
+    ind.innerHTML = `<div style="padding:8px 12px;background:#F8F3E5;border-left:3px solid var(--ink-soft);border-radius:2px;margin-bottom:14px;font-size:12px;">
+      <b>No active run.</b> This door will be unassigned — you can sort it later from History.
+    </div>`;
+  }
+}
+
+function setTrack(t) {
+  formState.track = t;
+  document.querySelectorAll('[data-track]').forEach(b => {
+    b.classList.toggle('active', b.dataset.track === t);
+  });
+}
+
+function setOutcome(o) {
+  formState.outcome = o;
+  document.querySelectorAll('[data-outcome]').forEach(b => {
+    b.classList.toggle('active', b.dataset.outcome === o);
+  });
+  const needsReturn = ['R','CB','NT'].includes(o);
+  const needsContract = o === 'CT';
+  document.getElementById('followup-date-field').style.display = needsReturn ? 'block' : 'none';
+  document.getElementById('contract-end-field').style.display = needsContract ? 'block' : 'none';
+
+  if (needsReturn && !document.getElementById('f-returnon').value) {
+    const d = new Date();
+    const days = o === 'R' ? 17 : o === 'CB' ? 3 : 7;
+    d.setDate(d.getDate() + days);
+    document.getElementById('f-returnon').value = d.toISOString().slice(0,10);
+  }
+}
+
+function resetForm() {
+  ['f-biz','f-contact','f-onething','f-processor','f-returnon','f-contractend'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.querySelectorAll('[data-track]').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('[data-outcome]').forEach(b => b.classList.remove('active'));
+  document.getElementById('followup-date-field').style.display = 'none';
+  document.getElementById('contract-end-field').style.display = 'none';
+  formState = { track: null, outcome: null, editingId: null };
+  document.getElementById('log-subhead').textContent = 'quick tap · 15 seconds';
+}
+
+function saveDoor() {
+  const biz = document.getElementById('f-biz').value.trim();
+  if (!biz) { alert('Business name required'); return; }
+  if (!formState.outcome) { alert('Pick an outcome'); return; }
+
+  const activeRun = getActiveRun();
+  const record = {
+    id: formState.editingId || ('d_' + Date.now() + '_' + Math.random().toString(36).slice(2,6)),
+    runId: formState.editingId
+      ? state.doors.find(x => x.id === formState.editingId).runId
+      : (activeRun ? activeRun.id : null),
+    business: biz,
+    contact: document.getElementById('f-contact').value.trim(),
+    oneThing: document.getElementById('f-onething').value.trim(),
+    processor: document.getElementById('f-processor').value.trim(),
+    track: formState.track,
+    outcome: formState.outcome,
+    returnOn: document.getElementById('f-returnon').value || null,
+    contractEnd: document.getElementById('f-contractend').value || null,
+    loggedAt: formState.editingId
+      ? state.doors.find(x=>x.id===formState.editingId).loggedAt
+      : new Date().toISOString(),
+  };
+
+  if (record.contractEnd) {
+    const ce = new Date(record.contractEnd);
+    ce.setDate(ce.getDate() - 60);
+    record.returnOn = ce.toISOString().slice(0,10);
+  }
+
+  if (formState.editingId) {
+    const idx = state.doors.findIndex(x => x.id === formState.editingId);
+    state.doors[idx] = record;
+  } else {
+    state.doors.unshift(record);
+  }
+  saveState();
+  resetForm();
+  switchView('home');
+}
+
+function computeDue(areaFilter) {
+  let list = state.doors
+    .filter(d => d.returnOn && ['R','CB','NT','CT'].includes(d.outcome));
+  if (areaFilter) {
+    list = list.filter(d => {
+      if (!d.runId) return false;
+      const r = state.runs.find(rr => rr.id === d.runId);
+      return r && r.area === areaFilter;
+    });
+  }
+  return list.sort((a,b) => new Date(a.returnOn) - new Date(b.returnOn));
+}
+
+function renderFollowups() {
+  const areas = getAreas();
+  const filterBar = document.getElementById('followups-filter');
+  filterBar.innerHTML = `
+    <button class="filter-chip ${followupAreaFilter === null ? 'active' : ''}" onclick="setFollowupFilter(null)">All</button>
+    ${areas.map(a => `<button class="filter-chip ${followupAreaFilter === a ? 'active' : ''}" onclick="setFollowupFilter('${escapeAttr(a)}')">${escapeHtml(a)}</button>`).join('')}
+  `;
+
+  const all = computeDue(followupAreaFilter);
+  const list = document.getElementById('followups-list');
+  if (all.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">○</div>no follow-ups${followupAreaFilter ? ' in this area' : ''}<br><span style="font-size:11px;">log a door with outcome R or CB to create one</span></div>`;
+    return;
+  }
+  const now = new Date(); now.setHours(0,0,0,0);
+  const overdue = [], today = [], upcoming = [];
+  all.forEach(d => {
+    const when = new Date(d.returnOn);
+    if (when < now) overdue.push(d);
+    else if (when.toDateString() === now.toDateString()) today.push(d);
+    else upcoming.push(d);
+  });
+
+  list.innerHTML =
+    (overdue.length ? `<div class="section-label danger">Overdue · ${overdue.length}</div>${overdue.map(followupCard).join('')}` : '') +
+    (today.length ? `<div class="section-label warm">Due today · ${today.length}</div>${today.map(followupCard).join('')}` : '') +
+    (upcoming.length ? `<div class="section-label forest">Upcoming · ${upcoming.length}</div>${upcoming.map(followupCard).join('')}` : '');
+}
+
+function setFollowupFilter(area) {
+  followupAreaFilter = area;
+  renderFollowups();
+}
+
+function followupCard(d) {
+  const when = new Date(d.returnOn);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const daysOut = Math.round((when - now) / 86400000);
+  const relative = daysOut < 0 ? `${-daysOut}d overdue`
+                  : daysOut === 0 ? 'today'
+                  : daysOut === 1 ? 'tomorrow'
+                  : `in ${daysOut}d`;
+  const overdueClass = daysOut < 0 ? 'overdue' : 'visit-due';
+  const areaStr = d.runId
+    ? (state.runs.find(r => r.id === d.runId)?.area || '—')
+    : 'unassigned';
+  return `
+    <div class="card ${overdueClass}" onclick="viewDoor('${d.id}')">
+      <div class="card-head">
+        <div class="card-title">${escapeHtml(d.business)}</div>
+        <div class="card-meta">${relative}</div>
+      </div>
+      <div class="card-body">
+        ${d.contact ? `<b>${escapeHtml(d.contact)}</b> · ` : ''}
+        ${d.oneThing ? `<em>"${escapeHtml(d.oneThing)}"</em>` : '<em style="color:var(--ink-soft);">no notes</em>'}
+      </div>
+      <div class="tag-row">
+        <span class="outcome-tag o-${d.outcome}">${d.outcome}</span>
+        <span class="muted">${escapeHtml(areaStr)} · ${when.toLocaleDateString()}</span>
+      </div>
+    </div>`;
+}
+
+function setHistoryMode(mode) {
+  historyMode = mode;
+  document.querySelectorAll('#history-toggle .filter-chip').forEach((c,i) => {
+    c.classList.toggle('active',
+      (mode === 'runs' && i === 0) || (mode === 'areas' && i === 1) || (mode === 'unassigned' && i === 2)
+    );
+  });
+  renderHistory();
+  switchView('history');
+}
+
+function renderHistory() {
+  const content = document.getElementById('history-content');
+  if (historyMode === 'runs') {
+    const endedRuns = state.runs.filter(r => r.endedAt);
+    if (endedRuns.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="empty-icon">○</div>no completed runs yet</div>`;
+      return;
+    }
+    const byMonth = {};
+    endedRuns.forEach(r => {
+      const d = new Date(r.startedAt);
+      const key = d.toLocaleDateString([], {year:'numeric', month:'long'});
+      (byMonth[key] = byMonth[key] || []).push(r);
+    });
+    content.innerHTML = Object.entries(byMonth).map(([month, runs]) => `
+      <div class="area-group-header">${month} · ${runs.length} run${runs.length>1?'s':''}</div>
+      ${runs.map(runCard).join('')}
+    `).join('');
+  } else if (historyMode === 'areas') {
+    const areas = getAreas();
+    if (areas.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="empty-icon">○</div>no areas yet</div>`;
+      return;
+    }
+    content.innerHTML = areas.map(area => {
+      const areaRuns = state.runs.filter(r => r.area === area);
+      const runIds = new Set(areaRuns.map(r => r.id));
+      const areaDoors = state.doors.filter(d => runIds.has(d.runId));
+      const stmts = areaDoors.filter(d => d.outcome === 'S').length;
+      const dueHere = computeDue(area).length;
+      return `
+        <div class="card forest-accent" onclick="viewArea('${escapeAttr(area)}')">
+          <div class="card-head">
+            <div class="card-title">${escapeHtml(area)}</div>
+            <div class="card-meta">${areaRuns.length} run${areaRuns.length>1?'s':''}</div>
+          </div>
+          <div class="card-body">
+            <b>${areaDoors.length}</b> doors · <b>${stmts}</b> stmts
+            ${dueHere > 0 ? ` · <b style="color:var(--warm-dark);">${dueHere} follow-up${dueHere>1?'s':''} due</b>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else if (historyMode === 'unassigned') {
+    const unassigned = state.doors.filter(d => !d.runId);
+    if (unassigned.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="empty-icon">○</div>no unassigned doors<br><span style="font-size:11px;">everything's tied to a run</span></div>`;
+      return;
+    }
+    content.innerHTML = `
+      <div class="quick-guide" style="background:var(--cream);color:var(--ink);border-left-color:var(--ink-soft);">
+        <div class="label" style="color:var(--ink-soft);">${unassigned.length} door${unassigned.length>1?'s':''} without a run</div>
+        Tap a door to assign it to an existing run.
+      </div>
+      ${unassigned.map(doorCard).join('')}
+    `;
+  }
+}
+
+function openModal(title, html) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target.id === 'modal') closeModal();
+});
+
+function viewDoor(id) {
+  const d = state.doors.find(x => x.id === id);
+  if (!d) return;
+  const run = d.runId ? state.runs.find(r => r.id === d.runId) : null;
+  const assignHtml = !d.runId && state.runs.length > 0 ? `
+    <div style="padding:10px;background:#F8F3E5;border-radius:3px;margin-top:12px;">
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">Assign to run</div>
+      ${state.runs.slice(0,10).map(r => `
+        <button class="chip" style="margin:2px;" onclick="assignDoorToRun('${d.id}','${r.id}')">${escapeHtml(r.area)} (${new Date(r.startedAt).toLocaleDateString([],{month:'short',day:'numeric'})})</button>
+      `).join('')}
+    </div>` : '';
+
+  openModal(d.business, `
+    ${run ? `<p class="muted">${escapeHtml(run.area)} · ${new Date(run.startedAt).toLocaleDateString()}</p>` : '<p class="muted">unassigned door</p>'}
+    ${d.contact ? `<p><strong>Contact:</strong> ${escapeHtml(d.contact)}</p>` : ''}
+    ${d.oneThing ? `<p style="background:#FFF8EA;padding:10px;border-left:3px solid var(--warm);font-family:'Fraunces',serif;font-style:italic;">★ ${escapeHtml(d.oneThing)}</p>` : ''}
+    <p><strong>Track:</strong> ${d.track || '—'} · <strong>Outcome:</strong> ${d.outcome}</p>
+    ${d.processor ? `<p><strong>Processor:</strong> ${escapeHtml(d.processor)}</p>` : ''}
+    ${d.returnOn ? `<p><strong>Return on:</strong> ${new Date(d.returnOn).toLocaleDateString()}</p>` : ''}
+    ${d.contractEnd ? `<p><strong>Contract ends:</strong> ${new Date(d.contractEnd).toLocaleDateString()}</p>` : ''}
+    <p class="muted">Logged ${new Date(d.loggedAt).toLocaleString()}</p>
+    ${assignHtml}
+    <button class="action-btn ghost" onclick="editDoor('${d.id}')">Edit</button>
+    <button class="action-btn danger-ghost" onclick="deleteDoor('${d.id}')">Delete</button>
+  `);
+}
+
+function assignDoorToRun(doorId, runId) {
+  const d = state.doors.find(x => x.id === doorId);
+  if (!d) return;
+  d.runId = runId;
+  saveState();
+  closeModal();
+  renderHistory();
+  renderHome();
+}
+
+function editDoor(id) {
+  const d = state.doors.find(x => x.id === id);
+  if (!d) return;
+  closeModal();
+  switchView('log');
+  document.getElementById('f-biz').value = d.business || '';
+  document.getElementById('f-contact').value = d.contact || '';
+  document.getElementById('f-onething').value = d.oneThing || '';
+  document.getElementById('f-processor').value = d.processor || '';
+  if (d.returnOn) document.getElementById('f-returnon').value = d.returnOn;
+  if (d.contractEnd) document.getElementById('f-contractend').value = d.contractEnd;
+  if (d.track) setTrack(d.track);
+  if (d.outcome) setOutcome(d.outcome);
+  formState.editingId = d.id;
+  document.getElementById('log-subhead').textContent = 'editing: ' + d.business;
+}
+
+function deleteDoor(id) {
+  if (!confirm('Delete this door?')) return;
+  state.doors = state.doors.filter(x => x.id !== id);
+  saveState();
+  closeModal();
+  renderHome();
+  renderHistory();
+  renderFollowups();
+}
+
+function viewRun(id) {
+  const r = state.runs.find(x => x.id === id);
+  if (!r) return;
+  const doors = state.doors.filter(d => d.runId === id)
+    .sort((a,b) => new Date(b.loggedAt) - new Date(a.loggedAt));
+  const stmts = doors.filter(d => d.outcome === 'S').length;
+  const rels = doors.filter(d => d.outcome === 'R').length;
+  const startStr = new Date(r.startedAt).toLocaleString();
+  const endStr = r.endedAt ? new Date(r.endedAt).toLocaleString() : 'active';
+
+  const reviewHtml = r.review ? `
+    <div class="divider"></div>
+    <div class="section-label">End-of-day review</div>
+    ${r.review.disarm ? `<p><b>Disarm:</b> ${escapeHtml(r.review.disarm)}</p>` : ''}
+    ${r.review.story ? `<p><b>Best story:</b> ${escapeHtml(r.review.story)}</p>` : ''}
+    ${r.review.slip ? `<p><b>Pitch slip:</b> ${escapeHtml(r.review.slip)}</p>` : ''}
+    ${r.review.v2plan ? `<p><b>V2 plan:</b> ${escapeHtml(r.review.v2plan)}</p>` : ''}
+  ` : (r.endedAt ? `<button class="action-btn secondary" onclick="promptEodReview(getRunById('${r.id}'))">Add end-of-day review</button>` : '');
+
+  openModal(r.area, `
+    <p class="muted">Started ${startStr}<br>Ended ${endStr}${r.autoEnded ? ' <em>(auto)</em>' : ''}</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="num">${doors.length}</div><div class="lbl">Doors</div></div>
+      <div class="stat-box"><div class="num">${stmts}</div><div class="lbl">Statements</div></div>
+      <div class="stat-box"><div class="num">${rels}</div><div class="lbl">Relationships</div></div>
+    </div>
+    ${doors.length > 0
+      ? `<div class="section-label">Doors in this run</div>${doors.map(doorCard).join('')}`
+      : '<p class="muted">No doors logged in this run.</p>'}
+    ${reviewHtml}
+    <button class="action-btn danger-ghost" onclick="deleteRun('${r.id}')">Delete run</button>
+  `);
+}
+
+function getRunById(id) { return state.runs.find(r => r.id === id); }
+
+function deleteRun(id) {
+  if (!confirm('Delete this run? Doors in it become unassigned.')) return;
+  state.doors.forEach(d => { if (d.runId === id) d.runId = null; });
+  state.runs = state.runs.filter(r => r.id !== id);
+  if (state.activeRunId === id) state.activeRunId = null;
+  saveState();
+  closeModal();
+  renderHome();
+  renderHistory();
+}
+
+function viewArea(area) {
+  const areaRuns = state.runs.filter(r => r.area === area)
+    .sort((a,b) => new Date(b.startedAt) - new Date(a.startedAt));
+  const runIds = new Set(areaRuns.map(r => r.id));
+  const allDoors = state.doors.filter(d => runIds.has(d.runId))
+    .sort((a,b) => new Date(b.loggedAt) - new Date(a.loggedAt));
+  const stmts = allDoors.filter(d => d.outcome === 'S').length;
+  const due = computeDue(area);
+
+  openModal(area, `
+    <p class="muted">${areaRuns.length} run${areaRuns.length>1?'s':''} · lifetime totals</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="num">${allDoors.length}</div><div class="lbl">Doors</div></div>
+      <div class="stat-box"><div class="num">${stmts}</div><div class="lbl">Statements</div></div>
+      <div class="stat-box"><div class="num">${due.length}</div><div class="lbl">Due Follow-ups</div></div>
+    </div>
+    ${due.length > 0 ? `
+      <div class="section-label warm">Follow-ups due here</div>
+      ${due.map(followupCard).join('')}
+    ` : ''}
+    <div class="section-label">All runs in ${escapeHtml(area)}</div>
+    ${areaRuns.map(runCard).join('')}
+  `);
+}
+
+function promptEodReview(run) {
+  const doors = state.doors.filter(d => d.runId === run.id);
+  openModal(`EOD: ${run.area}`, `
+    <p class="muted">${doors.length} doors · don't skip this</p>
+    <div class="field">
+      <label>Which disarm landed best?</label>
+      <textarea id="r-disarm" placeholder="The Sox comment at the bagel place…"></textarea>
+    </div>
+    <div class="field">
+      <label>Best "one thing" I collected</label>
+      <textarea id="r-story"></textarea>
+    </div>
+    <div class="field">
+      <label>Where did I slip into pitch mode?</label>
+      <textarea id="r-slip"></textarea>
+    </div>
+    <div class="field">
+      <label>V2s to schedule this week</label>
+      <textarea id="r-v2"></textarea>
+    </div>
+    <button class="action-btn" onclick="saveEodReview('${run.id}')">SAVE REVIEW</button>
+    <button class="action-btn ghost" onclick="closeModal();renderHome();">Skip for now</button>
+  `);
+}
+
+function saveEodReview(runId) {
+  const r = state.runs.find(x => x.id === runId);
+  if (!r) return;
+  r.review = {
+    completedAt: new Date().toISOString(),
+    disarm: document.getElementById('r-disarm').value.trim(),
+    story: document.getElementById('r-story').value.trim(),
+    slip: document.getElementById('r-slip').value.trim(),
+    v2plan: document.getElementById('r-v2').value.trim(),
+  };
+  saveState();
+  closeModal();
+  renderHome();
+}
+
+function togglePb(el) { el.parentElement.classList.toggle('open'); }
+
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `forest-field-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearData() {
+  if (!confirm('Clear ALL data? Cannot be undone.')) return;
+  if (!confirm('Really sure?')) return;
+  state = { runs: [], doors: [], reviews: [], activeRunId: null };
+  saveState();
+  renderHome();
+  renderHistory();
+  renderFollowups();
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/'/g, '&#39;');
+}
+
+autoEndAtMidnightIfNeeded();
+renderHome();
+updateRunStatus();
+</script>
+
+</body>
+</html>
